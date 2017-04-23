@@ -9,7 +9,7 @@ with open('casts.csv', 'r') as f:
 text = text.decode('utf-8').encode('ascii', 'ignore')
 
 G=nx.Graph()
-films = text.split("\n")[100:200]
+films = text.split("\n")[0:200]
 filmId = ''
 filmsNumber = len(films)
 for i in range (0, filmsNumber - 1):
@@ -20,15 +20,13 @@ for i in range (0, filmsNumber - 1):
     for j in range (i+1, filmsNumber - 1):
         params2 = films[j].split(";")
         if (filmId != params2[0]):
-            print("---", filmId, params2[0])
             break
-        print(params2[0])
         G.add_node(params2[2])
         G.add_edges_from([(actor, params2[2])])
 
 pos = graphviz_layout(G, prog="fdp")
 
-nx.draw(G,
+nx.draw(G, pos,
         labels={v:str(v) for v in G},
         cmap = plt.get_cmap("bwr"),
         node_color=[G.degree(v) for v in G],
@@ -44,14 +42,14 @@ for centrality in centralities:
     region+=1
     plt.subplot(region)
     plt.title(centrality.__name__)
-    nx.draw(G, labels={v:str(v) for v in G},
+    nx.draw(G, pos, labels={v:str(v) for v in G},
       cmap = plt.get_cmap("bwr"), node_color=[centrality(G)[k] for k in centrality(G)])
 plt.savefig("centralities.png")
 plt.show()
 
 communities = {node:cid+1 for cid,community in enumerate(nx.k_clique_communities(G,3)) for node in community}
 
-nx.draw(G,
+nx.draw(G, pos,
         labels={v:str(v) for v in G},
         cmap = plt.get_cmap("rainbow"),
         node_color=[communities[v] if v in communities else 0 for v in G])
